@@ -26,54 +26,64 @@ class CategoryController extends Controller
      * GET /category/index
      * List all service categories with pagination
      */
+
     public function actionIndex()
-    {
-        try {
-            // Get pagination parameters
-            $page = (int)Yii::app()->request->getParam('page', 1);
-            $limit = (int)Yii::app()->request->getParam('limit', 20);
-            $offset = ($page - 1) * $limit;
-            
-            // Build criteria
-            $criteria = new CDbCriteria();
-            $criteria->condition = 'status = 1';
-            $criteria->order = 'name ASC';
-            $criteria->limit = $limit;
-            $criteria->offset = $offset;
-            
-            // Get categories - using ServiceCategory model
-            $categories = ServiceCategory::model()->findAll($criteria);
-            $totalCount = ServiceCategory::model()->count('status = 1');
-            
-            // Format response
-            $data = [];
-            foreach ($categories as $category) {
-                $data[] = [
-                    'categoryUlid' => $category->categoryUlid,  // Changed from categoryId
-                    'name' => $category->name,
-                    'description' => $category->description,
-                    'createdAt' => $category->createdAt,
-                    'updatedAt' => $category->updatedAt
-                ];
-            }
-            
-            // Return success response
-            $this->sendJson([
-                'success' => true,
-                'message' => 'Categories retrieved successfully',
-                'data' => $data,
-                'pagination' => [
-                    'page' => $page,
-                    'limit' => $limit,
-                    'total' => $totalCount,
-                    'pages' => ceil($totalCount / $limit)
-                ]
-            ], 200);
-            
-        } catch (Exception $e) {
-            $this->sendJsonError('Server error: ' . $e->getMessage(), 500);
+{
+    try {
+        // Get pagination parameters
+        $page = (int)Yii::app()->request->getParam('page', 1);
+        $limit = (int)Yii::app()->request->getParam('limit', 20);
+        $offset = ($page - 1) * $limit;
+        
+        // Build criteria
+        $criteria = new CDbCriteria();
+        // $criteria->condition = 'status = 1';
+        $criteria->order = 'name ASC';
+        $criteria->limit = $limit;
+        $criteria->offset = $offset;
+        
+        // Get categories
+        $categories = ServiceCategory::model()->findAll($criteria);
+        $totalCount = ServiceCategory::model()->count('status = 1');
+        
+        // Format response
+        $data = [];
+        foreach ($categories as $category) {
+            // Count providers linked to this category
+            $providersCount = ServiceProvider::model()->countByAttributes([
+                'categoryUlid' => $category->categoryUlid,
+                'status' => 1
+            ]);
+
+            $data[] = [
+                'categoryUlid'   => $category->categoryUlid,
+                'name'           => $category->name,
+                'description'    => $category->description,
+                'createdAt'      => $category->createdAt,
+                'updatedAt'      => $category->updatedAt,
+                'status'         => $category->status,
+                'providersCount' => (int)$providersCount, // added provider count
+            ];
         }
+        
+        // Return success response
+        $this->sendJson([
+            'success' => true,
+            'message' => 'Categories retrieved successfully',
+            'data' => $data,
+            'pagination' => [
+                'page' => $page,
+                'limit' => $limit,
+                'total' => $totalCount,
+                'pages' => ceil($totalCount / $limit)
+            ]
+        ], 200);
+        
+    } catch (Exception $e) {
+        $this->sendJsonError('Server error: ' . $e->getMessage(), 500);
     }
+}
+
 
     /**
      * GET /category/view/{categoryUlid}

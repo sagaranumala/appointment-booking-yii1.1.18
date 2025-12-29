@@ -23,14 +23,15 @@ class ProviderController extends BaseApiController
  * GET /provider/index?categoryUlid=xxx
  * List all providers (optional category filter)
  */
+
 public function actionIndex()
 {
     $categoryUlid = Yii::app()->request->getQuery('categoryUlid');
 
     $criteria = new CDbCriteria();
     $criteria->condition = 't.status = 1';
-    $criteria->with = ['user'];   // JOIN users table
-    $criteria->together = true;   // force single query
+    $criteria->with = ['user', 'category'];   // join users and category table
+    $criteria->together = true;
 
     if (!empty($categoryUlid)) {
         $criteria->addCondition('t.categoryUlid = :categoryUlid');
@@ -47,14 +48,15 @@ public function actionIndex()
             'providerUlid'    => $provider->providerUlid,
             'userUlid'        => $provider->userUlid,
             'categoryUlid'    => $provider->categoryUlid,
-            'experienceYears'=> (int) $provider->experienceYears,
+            'categoryName'    => $provider->category ? $provider->category->name : null, // <-- added
+            'experienceYears' => (int) $provider->experienceYears,
             'bio'             => $provider->bio,
             'hourlyRate'      => (float) $provider->hourlyRate,
             'status'          => (int) $provider->status,
             'createdAt'       => $provider->createdAt,
             'updatedAt'       => $provider->updatedAt,
 
-            // user fields (safe access)
+            // user fields
             'name'            => $provider->user ? $provider->user->name : null,
             'email'           => $provider->user ? $provider->user->email : null,
             'phone'           => $provider->user ? $provider->user->phone : null,
@@ -115,48 +117,6 @@ public function actionView()
         'data' => $data
     ]);
 }
-
-
-    // /**
-    //  * GET /provider/view/{providerUlid}
-    //  * View single provider
-    //  */
-    // public function actionView($providerUlid)
-    // {
-    //     $provider = ServiceProvider::model()->findByAttributes([
-    //         'providerUlid' => $providerUlid,
-    //         'status' => 1
-    //     ]);
-        
-    //     if (!$provider) {
-    //         $this->sendJsonError('Provider not found', 404);
-    //     }
-
-    //     $user = User::model()->findByAttributes(['userId' => $provider->userUlid]);
-    //     $category = ServiceCategory::model()->findByAttributes(['categoryUlid' => $provider->categoryUlid]);
-
-    //     $data = [
-    //         'providerUlid' => $provider->providerUlid,
-    //         'userUlid' => $provider->userUlid,
-    //         'categoryUlid' => $provider->categoryUlid,
-    //         'name' => $user ? $user->name : null,
-    //         'email' => $user ? $user->email : null,
-    //         'phone' => $user ? $user->phone : null,
-    //         'experienceYears' => $provider->experienceYears,
-    //         'bio' => $provider->bio,
-    //         // 'website' => $provider->website,
-    //         'hourlyRate' => $provider->hourlyRate,
-    //         'categoryName' => $category ? $category->name : null,
-    //         'status' => $provider->status,
-    //         'createdAt' => $provider->createdAt,
-    //         'updatedAt' => $provider->updatedAt
-    //     ];
-
-    //     $this->sendJson([
-    //         'success' => true,
-    //         'data' => $data
-    //     ]);
-    // }
 
     /**
      * POST /provider/create

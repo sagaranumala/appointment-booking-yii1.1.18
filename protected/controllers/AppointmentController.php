@@ -10,34 +10,204 @@ class AppointmentController extends BaseApiController
     /**
      * GET /appointment/index
      */
-    public function actionIndex()
-    {
-        $currentUser = Yii::app()->jwt->getCurrentUser();
-        if (!$currentUser) {
-            $this->sendJsonError('Unauthorized', 401);
-        }
+    // public function actionIndex()
+    // {
+    //     $currentUser = Yii::app()->jwt->getCurrentUser();
+    //     if (!$currentUser || empty($currentUser['userId'])) {
+    //         $this->sendJsonError('Unauthorized', 401);
+    //         return;
+    //     }
 
-        $criteria = new CDbCriteria();
-        $criteria->compare('customerUlid', $currentUser['userId']);
-        $criteria->order = 'appointmentDate ASC, startTime ASC';
+    //     $criteria = new CDbCriteria();
 
-        $appointments = Appointment::model()->findAll($criteria);
+    //     // 🔐 Role-based filtering
+    //     if (!isset($currentUser['role']) || $currentUser['role'] !== 'admin') {
+    //         // Non-admin → only own appointments
+    //         $criteria->compare('customerUlid', $currentUser['userId']);
+    //     }
+    //     // Admin → no filter (fetch all)
 
-        $data = [];
-        foreach ($appointments as $a) {
-            $data[] = [
-                'appointmentUlid' => $a->appointmentUlid,
-                'providerUlid' => $a->providerUlid,
-                'appointmentDate' => $a->appointmentDate,
-                'startTime' => $a->startTime,
-                'endTime' => $a->endTime,
-                'status' => $a->status,
-                'notes' => $a->notes,
-            ];
-        }
+    //     $criteria->order = 'appointmentDate ASC, startTime ASC';
 
-        $this->sendJson(['success' => true, 'data' => $data]);
+    //     $appointments = Appointment::model()->findAll($criteria);
+
+    //     $data = [];
+
+    //     foreach ($appointments as $a) {
+
+    //         // 🔹 Customer
+    //         $customer = User::model()->findByAttributes([
+    //             'userId' => $a->customerUlid
+    //         ]);
+
+    //         // 🔹 Provider profile
+    //         $provider = ServiceProvider::model()->findByAttributes([
+    //             'providerUlid' => $a->providerUlid
+    //         ]);
+
+    //         // 🔹 Provider user
+    //         $providerUser = null;
+    //         if ($provider && !empty($provider->userUlid)) {
+    //             $providerUser = User::model()->findByAttributes([
+    //                 'userId' => $provider->userUlid
+    //             ]);
+    //         }
+
+    //         // 🔹 Category
+    //         $category = ServiceCategory::model()->findByPk($a->categoryUlid);
+
+    //         $data[] = [
+    //             'appointmentUlid' => $a->appointmentUlid,
+
+    //             // IDs
+    //             'customerUlid'    => $a->customerUlid,
+    //             'providerUlid'    => $a->providerUlid,
+    //             'categoryUlid'    => $a->categoryUlid,
+
+    //             // Names
+    //             'customerName'    => $customer ? $customer->name : null,
+    //             'providerName'    => $providerUser ? $providerUser->name : null,
+    //             'categoryName'    => $category ? $category->name : null,
+
+    //             // Appointment
+    //             'appointmentDate' => $a->appointmentDate,
+    //             'startTime'       => $a->startTime,
+    //             'endTime'         => $a->endTime,
+    //             'status'          => $a->status,
+    //             'notes'           => $a->notes,
+
+    //             // Pricing
+    //             'hourlyRate'      => $provider ? $provider->hourlyRate : null,
+    //         ];
+    //     }
+
+    //     $this->sendJson([
+    //         'success' => true,
+    //         'data' => $data
+    //     ]);
+    // }
+
+   public function actionIndex()
+{
+    $currentUser = Yii::app()->jwt->getCurrentUser();
+    if (!$currentUser || empty($currentUser['userId'])) {
+        $this->sendJsonError('Unauthorized', 401);
+        return;
     }
+
+    $criteria = new CDbCriteria();
+
+    $role = strtolower($currentUser['role']);
+
+    if ($role === 'admin') {
+        // Admin → no filter
+    } elseif ($role === 'provider') {
+        // Provider → fetch appointments for their providerUlid
+        $provider = ServiceProvider::model()->findByAttributes([
+            'userUlid' => $currentUser['userId'],
+            'status' => 1,
+        ]);
+
+        if (!$provider) {
+            $this->sendJsonError('Provider profile not found', 404);
+            return;
+        }
+
+        $criteria->compare('providerUlid', $provider->providerUlid);
+    } else {
+        // Regular user → fetch only their appointments
+        $criteria->compare('customerUlid', $currentUser['userId']);
+    }
+
+    $criteria->order = 'appointmentDate ASC, startTime ASC';
+
+    $appointments = Appointment::model()->findAll($criteria);
+
+    $data = [];
+
+    foreach ($appointments as $a) {
+        // 🔹 Customer
+        $customer = User::model()->findByAttributes([
+            'userId' => $a->customerUlid
+        ]);
+
+        // 🔹 Provider profile
+        $provider = ServiceProvider::model()->findByAttributes([
+            'providerUlid' => $a->providerUlid
+        ]);
+
+        // 🔹 Provider user
+        $providerUser = null;
+        if ($provider && !empty($provider->userUlid)) {
+            $providerUser = User::model()->findByAttributes([
+                'userId' => $provider->userUlid
+            ]);
+        }
+
+        // 🔹 Category
+        $category = ServiceCategory::model()->findByPk($a->categoryUlid);
+
+        $data[] = [
+            'appointmentUlid' => $a->appointmentUlid,
+
+            // IDs
+            'customerUlid'    => $a->customerUlid,
+            'providerUlid'    => $a->providerUlid,
+            'categoryUlid'    => $a->categoryUlid,
+
+            // Names
+            'customerName'    => $customer ? $customer->name : null,
+            'providerName'    => $providerUser ? $providerUser->name : null,
+            'categoryName'    => $category ? $category->name : null,
+
+            // Appointment
+            'appointmentDate' => $a->appointmentDate,
+            'startTime'       => $a->startTime,
+            'endTime'         => $a->endTime,
+            'status'          => $a->status,
+            'notes'           => $a->notes,
+
+            // Pricing
+            'hourlyRate'      => $provider ? $provider->hourlyRate : null,
+        ];
+    }
+
+    $this->sendJson([
+        'success' => true,
+        'data'    => $data,
+    ]);
+}
+
+
+
+    // public function actionIndex()
+    // {
+    //     $currentUser = Yii::app()->jwt->getCurrentUser();
+    //     if (!$currentUser) {
+    //         $this->sendJsonError('Unauthorized', 401);
+    //     }
+
+    //     $criteria = new CDbCriteria();
+    //     $criteria->compare('customerUlid', $currentUser['userId']);
+    //     $criteria->order = 'appointmentDate ASC, startTime ASC';
+
+    //     $appointments = Appointment::model()->findAll($criteria);
+
+    //     $data = [];
+    //     foreach ($appointments as $a) {
+    //         $data[] = [
+    //             'appointmentUlid' => $a->appointmentUlid,
+    //             'providerUlid' => $a->providerUlid,
+    //             'appointmentDate' => $a->appointmentDate,
+    //             'startTime' => $a->startTime,
+    //             'endTime' => $a->endTime,
+    //             'status' => $a->status,
+    //             'notes' => $a->notes,
+    //         ];
+    //     }
+
+    //     $this->sendJson(['success' => true, 'data' => $data]);
+    // }
 
 
 public function actionCreate()
