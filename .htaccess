@@ -1,0 +1,35 @@
+Options +FollowSymLinks
+RewriteEngine On
+
+# ===============================
+# ✅ CORS HEADERS (FOR LOCALHOST FRONTEND)
+# ===============================
+<IfModule mod_headers.c>
+    # Allow frontend origin
+    Header always set Access-Control-Allow-Origin "http://localhost:3000"
+    Header always set Access-Control-Allow-Credentials "true"
+
+    # Allow HTTP methods
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+
+    # Allow headers sent by frontend (must include your CSRF header)
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, YII_CSRF_TOKEN, X-CSRF-Token"
+
+    # Cache preflight for 1 day
+    Header always set Access-Control-Max-Age "86400"
+</IfModule>
+
+# ===============================
+# ✅ HANDLE PREFLIGHT OPTIONS REQUEST
+# ===============================
+# Return 204 No Content for OPTIONS requests
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=204,L]
+
+# ===============================
+# ✅ YII ROUTING
+# ===============================
+# If the request is not a file or directory, route to index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . index.php [L]

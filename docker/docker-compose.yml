@@ -1,0 +1,96 @@
+# version: '3.8'
+
+# services:
+#   web:
+#     image: php:7.4-apache
+#     container_name: yii-app
+#     ports:
+#       - "8080:80"
+#     volumes:
+#       - /c/xampp/htdocs/myapp2:/var/www/html
+#       - /c/xampp/htdocs/yii-1.1.18.018a89:/var/www/yii
+#     environment:
+#       APP_ENV: dev
+#       DB_HOST: host.docker.internal
+#       DB_NAME: ticketdb
+#       DB_USER: root
+#       DB_PASS: Sagar@194
+#     command: >
+#        bash -c "docker-php-ext-install pdo pdo_mysql mysqli &&
+#        a2enmod rewrite &&
+#        apache2-foreground"
+
+# services:
+#   web:
+    # build: .
+    # container_name: yii-app
+    # ports:
+    #   - "8080:80"
+    # volumes:
+    #   - /c/xampp/htdocs/myapp2:/var/www/html
+    #   - /c/xampp/htdocs/yii-1.1.18.018a89:/var/www/yii
+    # environment:
+    #   APP_ENV: dev
+    #   DB_HOST: host.docker.internal
+    #   DB_NAME: ticketdb
+    #   DB_USER: root
+    #   DB_PASS: Sagar@194
+    # command: >
+    #   bash -c "docker-php-ext-install pdo pdo_mysql mysqli &&
+    #   a2enmod rewrite &&
+    #   apache2-foreground"
+
+
+  # db:
+  #   image: mysql:5.7
+  #   container_name: yii-db
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: root
+  #     MYSQL_DATABASE: ticketdb
+  #     MYSQL_USER: yii_user
+  #     MYSQL_PASSWORD: yii_pass
+  #   ports:
+  #     - "3307:3306"
+
+
+
+version: '3.8'
+
+services:
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: yii-app
+    ports:
+      - "8080:80"
+    volumes:
+      - /c/xampp/htdocs/myapp7:/var/www/html
+      - /c/xampp/htdocs/yii-1.1.18.018a89:/var/www/yii
+    environment:
+      APP_ENV: dev
+      YII_DEBUG: "true"
+      YII_TRACE_LEVEL: "3"
+      DB_HOST: host.docker.internal
+      DB_NAME: ebook
+      DB_USER: root
+      DB_PASS: Sagar@194
+      SMTP_EMAIL: sagarpatelanumala7522@gmail.com
+      SMTP_PASSWORD: dkzk gket piix wxfk
+      PHP_TIMEZONE: Asia/Kolkata
+      R2_ENDPOINT: https://s3.us-west-1.idrivee2.com
+      # R2_RESUME_URL: https://resume-pload.s3.us-west-1.idrivee2.com/
+      R2_PROFILE_URL: https://profile.s3.us-west-1.idrivee2.com/
+      R2_BUCKET: profile
+      R2_REGION: us-west-1
+      R2_ACCESS_KEY: BvX0jRfSqm3jxGzkKBUq
+      R2_SECRET_KEY: LSP9tCZoPYxAzepIGNguJlUrR0Atk2F6Bk1dZPLh
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+# Uncomment if using MySQL in Docker
+# volumes:
+#   mysql_data:
+# dkzk332gket121piix12wxfk

@@ -1,0 +1,151 @@
+# ================================
+# Yii Application Git Ignore
+# ================================
+
+# ---- Yii runtime ----
+protected/runtime/
+runtime/
+
+# ---- Yii assets ----
+assets/
+protected/assets/
+web/assets/
+
+# ---- Uploads (optional, only if generated dynamically) ----
+uploads/
+public/uploads/
+
+# ---- Environment-specific configs (optional) ----
+protected/config/local.php
+protected/config/console-local.php
+config/db-local.php
+config/params-local.php
+
+# ---- Composer ----
+/vendor/
+/composer.lock
+composer.phar
+
+# ---- Node / Frontend (if exists) ----
+/node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# ---- IDE Files ----
+# JetBrains / PhpStorm
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Eclipse
+.project
+.buildpath
+
+# ---- OS Generated Files ----
+.DS_Store
+Thumbs.db
+
+# ---- Logs ----
+*.log
+
+# ---- Cache ----
+cache/
+protected/cache/
+
+# ---- Temporary Files ----
+*.tmp
+*.swp
+*.bak
+
+# ---- Environment variables ----
+.env
+.env.local
+
+# ---- PHPUnit ----
+/tests/_output/
+/tests/runtime/
+
+# =========================
+# Dependencies
+# =========================
+Frontend/
+UI/
+node_modules/
+.pnp/
+.pnp.js
+
+# =========================
+# Next.js build output
+# =========================
+.next/
+out/
+dist/
+
+# =========================
+# Production builds
+# =========================
+build/
+
+# =========================
+# Environment files
+# =========================
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# =========================
+# Logs
+# =========================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.log
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# TypeScript
+# =========================
+*.tsbuildinfo
+
+# =========================
+# ESLint / Prettier
+# =========================
+.eslintcache
+
+# =========================
+# Testing
+# =========================
+coverage/
+.nyc_output/
+
+# =========================
+# Docker
+# =========================
+docker-data/
+docker-volumes/
+
+# =========================
+# Optional (remove if needed)
+# =========================
+.vercel/
+
+

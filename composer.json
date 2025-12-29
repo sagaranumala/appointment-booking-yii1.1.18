@@ -1,0 +1,10 @@
+{
+    "require": {
+        "phpmailer/phpmailer": "^7.0",
+        "aws/aws-sdk-php": "^3.337",
+        "firebase/php-jwt": "^6.10",
+        "sonata-project/google-authenticator": "^2.3",
+        "phpgangsta/googleauthenticator": "dev-master",
+        "robthree/twofactorauth": "^1.8"
+    }
+}
